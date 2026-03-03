@@ -104,7 +104,7 @@
 <!-- LISTA -->
 <div id="page-lista" class="page active">
   <div class="page-header">
-    <div><h2>Mes Coureurs</h2><p class="text2">Jusqu'à 5 coureurs simultanés</p></div>
+    <div><h2>Mes Coureurs</h2><p class="text2">Jusqu\'à 5 coureurs simultanés</p></div>
     <button class="btn btn-primary" onclick="nuevoCorreder()">+ Nouveau coureur</button>
   </div>
   <div id="lista-corredores"></div>
@@ -727,9 +727,9 @@ function rS(){
     const ms=ph(c.marca);
     if(ms){
       const d=tf-ms,el=document.getElementById('seg-meta-d');
-      if(Math.abs(d)<=30)el.innerHTML='<span class="badge badge-green">🎯 Dans l'objectif ! '+c.marca+'</span>';
-      else if(d>0)el.innerHTML='<span class="badge badge-red">+'+fh(d)+' au-dessus de l'objectif</span>';
-      else el.innerHTML='<span class="badge badge-green">🎉 '+fh(-d)+' en-dessous de l'objectif</span>';
+      if(Math.abs(d)<=30)el.innerHTML='<span class="badge badge-green">🎯 Dans l\'objectif\u00a0! '+c.marca+'</span>';
+      else if(d>0)el.innerHTML='<span class="badge badge-red">+'+fh(d)+' au-dessus de l\'objectif</span>';
+      else el.innerHTML='<span class="badge badge-green">🎉 '+fh(-d)+' en-dessous de l\'objectif</span>';
     }
   }else mc.style.display='none';
 }
@@ -782,9 +782,9 @@ function calcProno(){
     if(ms){
       vs.style.display='block';
       const d=tot-ms,e=document.getElementById('prono-vs-t');
-      if(Math.abs(d)<=30)e.innerHTML='<span class="badge badge-green">🎯 Dans l'allure cible: '+fh(tot)+' vs '+c.marca+'</span>';
-      else if(d>0)e.innerHTML='<span class="badge badge-red">+'+fh(d)+' au-dessus de l'objectif ('+c.marca+')</span>';
-      else e.innerHTML='<span class="badge badge-green">🔥 '+fh(-d)+' en-dessous de l'objectif ('+c.marca+')</span>';
+      if(Math.abs(d)<=30)e.innerHTML='<span class="badge badge-green">🎯 Dans l\'allure cible\u00a0: '+fh(tot)+' vs '+c.marca+'</span>';
+      else if(d>0)e.innerHTML='<span class="badge badge-red">+'+fh(d)+' au-dessus de l\'objectif ('+c.marca+')</span>';
+      else e.innerHTML='<span class="badge badge-green">🔥 '+fh(-d)+' en-dessous de l\'objectif ('+c.marca+')</span>';
     }else vs.style.display='none';
   }else vs.style.display='none';
   el.style.display='block';
