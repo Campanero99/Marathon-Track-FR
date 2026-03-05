@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -54,7 +55,7 @@
   .badge-green{background:var(--green-bg);color:var(--green)}
   .badge-yellow{background:var(--yellow-bg);color:var(--yellow)}
   .badge-red{background:var(--red-bg);color:var(--red)}
-  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
   .stat-box{background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
   .stat-val{font-size:1.3rem;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums}
   .stat-label{font-size:.7rem;color:var(--text2);font-weight:600;margin-top:4px;text-transform:uppercase}
@@ -92,6 +93,60 @@
 </style>
 </head>
 <body>
+<!-- LICENSE GUARD -->
+<div id="license-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1a6fc4,#0d3d73);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:Segoe UI,system-ui,sans-serif;">
+  <div style="background:#fff;border-radius:20px;padding:36px 28px;max-width:400px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.3);text-align:center;">
+    <div style="font-size:3rem;margin-bottom:8px;">&#127939;</div>
+    <div style="font-size:1.3rem;font-weight:800;color:#1a2740;margin-bottom:4px;">MaratonTrack</div>
+    <div style="font-size:.85rem;color:#5a7499;margin-bottom:24px;">Entrez votre code de licence</div>
+    <label style="font-size:.8rem;font-weight:700;color:#5a7499;display:block;text-align:left;margin-bottom:6px;">Code de licence</label>
+    <input id="lic-input" type="text" placeholder="XXXXXX-XXXXXX-XXXXXX-..."
+      style="width:100%;padding:11px 14px;border:2px solid #c8d8ee;border-radius:10px;font-size:.9rem;outline:none;text-align:center;font-family:monospace;letter-spacing:1px;color:#1a2740;"
+      onkeydown="if(event.key==='Enter')checkLicense()">
+    <div id="lic-err" style="color:#c0392b;font-size:.8rem;margin-top:8px;min-height:18px;"></div>
+    <button onclick="checkLicense()" style="width:100%;margin-top:12px;padding:12px;background:#1a6fc4;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:800;cursor:pointer;">Accéder &rarr;</button>
+    <div id="lic-ok" style="display:none;margin-top:14px;background:#e6f7ef;border-radius:10px;padding:12px;font-size:.82rem;color:#1a9e5c;font-weight:600;"></div>
+  </div>
+</div>
+<script>
+var _SEC="MaratonTrack2025_XK9";
+async function _sha256(m){var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(m));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0");}).join("");}
+function _b64d(s){try{return decodeURIComponent(escape(atob(s)));}catch(e){return null;}}
+function _fd(s){return s.slice(6,8)+"/"+s.slice(4,6)+"/"+s.slice(0,4);}
+async function checkLicense(){
+  var raw=document.getElementById("lic-input").value.trim();
+  var err=document.getElementById("lic-err");
+  var ok=document.getElementById("lic-ok");
+  err.textContent="";ok.style.display="none";
+  try{
+    var b64=raw.replace(/-/g,"").replace(/ /g,"");
+    var full=_b64d(b64);
+    if(!full)throw "invalid";
+    var parts=full.split("|");
+    if(parts.length!==3)throw "invalid";
+    var empresa=parts[0],expiry=parts[1],check=parts[2];
+    var hash=await _sha256(empresa+"|"+expiry+_SEC);
+    if(hash.substring(0,8).toUpperCase()!==check)throw "tampered";
+    var exp=new Date(expiry.slice(0,4),expiry.slice(4,6)-1,expiry.slice(6,8));
+    var today=new Date();today.setHours(0,0,0,0);
+    var daysLeft=Math.ceil((exp-today)/86400000);
+    if(daysLeft<0)throw "expired";
+    sessionStorage.setItem("mt_lic_ok","1");
+    sessionStorage.setItem("mt_lic_empresa",empresa);
+    sessionStorage.setItem("mt_lic_expiry",_fd(expiry));
+    sessionStorage.setItem("mt_lic_days",daysLeft);
+    ok.innerHTML="Bienvenue, <b>"+empresa+"</b><br>Licence valide jusqu'au: "+_fd(expiry)+" &middot; <b>"+daysLeft+" jours restants</b>";
+    ok.style.display="block";
+    setTimeout(function(){document.getElementById("license-screen").style.display="none";},1800);
+  }catch(e){
+    if(String(e)==="expired"){err.textContent="Licence expirée. Contactez votre fournisseur.";}else if(String(e)==="tampered"){err.textContent="Code non valide.";}else{err.textContent="Code non valide. Bitte Eingabe prüfen.";}
+    var inp=document.getElementById("lic-input");inp.style.borderColor="#c0392b";
+    setTimeout(function(){inp.style.borderColor="#c8d8ee";},2000);
+  }
+}
+(function(){if(sessionStorage.getItem("mt_lic_ok")==="1"){document.getElementById("license-screen").style.display="none";}})();
+</script>
+<!-- END LICENSE GUARD -->
 
 <nav>
   <div class="nav-logo">🏃 <span>Maraton</span>Track</div>
@@ -104,7 +159,7 @@
 <!-- LISTA -->
 <div id="page-lista" class="page active">
   <div class="page-header">
-    <div><h2>Mes Coureurs</h2><p class="text2">Jusqu\'à 5 coureurs simultanés</p></div>
+    <div><h2>Mes Coureurs</h2><p class="text2">Jusqu'à 5 coureurs simultanés</p></div>
     <button class="btn btn-primary" onclick="nuevoCorreder()">+ Nouveau coureur</button>
   </div>
   <div id="lista-corredores"></div>
@@ -134,7 +189,7 @@
     <p class="text2" style="margin-bottom:10px;">Sélectionnez la ville pour charger automatiquement ses points de rendez-vous.</p>
     <div class="city-grid" id="city-grid"></div>
     <label style="margin-top:14px;">Nom de la course</label>
-    <input type="text" id="f-carrera" placeholder="Ex : Marathon de Paris 2025">
+    <input type="text" id="f-carrera" placeholder="Ex : Marathon de Paris">
   </div>
   <div class="card">
     <div class="card-title">⏱ Objectif et départ</div>
@@ -166,7 +221,7 @@
   </div>
   <div class="card">
     <div class="card-title">📍 Points de rendez-vous</div>
-    <p class="text2" style="margin-bottom:12px;">KM et nom de rue où vous verrez le coureur. Trié automatiquement.</p>
+    <p class="text2" style="margin-bottom:12px;">Kilomètres et noms de rues où vous verrez le coureur. Tri automatique.</p>
     <div id="puntos-container"></div>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button class="btn btn-outline btn-sm" onclick="addPunto()">+ Ajouter un point</button>
@@ -196,9 +251,10 @@
     <div class="stat-box"><div class="stat-val" id="stat-tc">—</div><div class="stat-label">Temps de course</div></div>
     <div class="stat-box"><div class="stat-val" id="stat-ra">—</div><div class="stat-label">Allure actuelle</div></div>
     <div class="stat-box"><div class="stat-val" id="stat-mp">—</div><div class="stat-label">Heure d'arrivée</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-marca-proj">—</div><div class="stat-label">Temps projeté</div></div>
   </div>
   <div class="card">
-    <div class="card-title">📍 Points de rendez-vous — appuyez "Ici !" quand le coureur passe</div>
+    <div class="card-title">📍 Rendez-Vous — appuyez "Ici !" quand le coureur passe</div>
     <div style="overflow-x:auto;">
       <table class="km-table">
         <thead><tr>
@@ -234,7 +290,25 @@
     <div class="card-title">📊 Données de passage</div>
     <div class="row3">
       <div><label>Kilomètre actuel</label><input type="number" id="prono-km" min="0.1" max="50" step="0.1" oninput="calcProno()"></div>
-      <div><label>Temps de course (h:mm:ss)</label><input type="text" id="prono-t" placeholder="1:45:30" inputmode="numeric" oninput="calcProno()"></div>
+      <div>
+        <label>Temps de course</label>
+        <div class="marca-inputs">
+          <div>
+            <input type="number" id="prono-t-h" placeholder="0" min="0" max="9" inputmode="numeric" oninput="calcProno()">
+            <div class="marca-lbl">h</div>
+          </div>
+          <div class="marca-sep">:</div>
+          <div>
+            <input type="number" id="prono-t-m" placeholder="00" min="0" max="59" inputmode="numeric" oninput="calcProno()">
+            <div class="marca-lbl">min</div>
+          </div>
+          <div class="marca-sep">:</div>
+          <div>
+            <input type="number" id="prono-t-s" placeholder="00" min="0" max="59" inputmode="numeric" oninput="calcProno()">
+            <div class="marca-lbl">ss</div>
+          </div>
+        </div>
+      </div>
       <div><label>Distance totale (km)</label><input type="number" id="prono-dist" value="42.195" step="0.001" oninput="calcProno()"></div>
     </div>
   </div>
@@ -277,7 +351,7 @@ const CIUDADES = {
     {km:38,calle:"Av. de la Catedral"},{km:39,calle:"Passeig de Colom"},
     {km:40,calle:"Av. del Parallel"},{km:42.195,calle:"META 🏁"}
   ]},
-  "Berlín":{flag:"🇩🇪",puntos:[
+  "Berlin":{flag:"🇩🇪",puntos:[
     {km:5,calle:"Alt Moabit"},{km:6,calle:"Alt Moabit"},{km:7,calle:"Otto von Bismarck Allee"},
     {km:8,calle:"Friedrichstraße"},{km:9,calle:"Torstraße"},{km:10,calle:"Torstraße"},
     {km:11,calle:"Otto-Braun-straße"},{km:12,calle:"Strausberger Platz"},
@@ -330,7 +404,7 @@ const CIUDADES = {
     {km:39,calle:"Victoria Embankment"},{km:40,calle:"Great Georg Street"},
     {km:42.195,calle:"META 🏁"}
   ]},
-  "París":{flag:"🇫🇷",puntos:[
+  "Paris":{flag:"🇫🇷",puntos:[
     {km:5,calle:"Rue St-Antoine"},{km:6,calle:"R. du Faubourg St-Antonie"},
     {km:7,calle:"Rue De Reuilly"},{km:8,calle:"Avenue Daumesnil"},{km:9,calle:"Avenue Daumesnil"},
     {km:10,calle:"Av. de St.-Maurice"},{km:11,calle:"Av. de Daumesnil"},
@@ -370,7 +444,7 @@ const CIUDADES = {
     {km:37,calle:"Calle del Archiduque Carlos"},{km:38,calle:"Avenida del Cid"},
     {km:39,calle:"Calle Xàtiva"},{km:40,calle:"Cale Colom"},{km:42.195,calle:"META 🏁"}
   ]},
-  "Roma":{flag:"🇮🇹",puntos:[
+  "Rome":{flag:"🇮🇹",puntos:[
     {km:5,calle:"Viale Ostiense"},{km:6,calle:"Viale Ferdinando Baldelli, 41"},
     {km:7,calle:"Viale Marconi"},{km:8,calle:"Lungotevere di Pietra Papa"},
     {km:9,calle:"Lungotevere Vittorio Gassman"},{km:10,calle:"Largo Marzi"},
@@ -433,7 +507,7 @@ const CIUDADES = {
     {km:39,calle:"Paseo Marítimo Pablo Ruiz Picasso"},{km:40,calle:"Paseo del Parque"},
     {km:42.195,calle:"META 🏁"}
   ]},
-  "Hamburgo":{flag:"🇩🇪",puntos:[
+  "Hambourg":{flag:"🇩🇪",puntos:[
     {km:5,calle:"Elbchausee"},{km:6,calle:"Othmarschen"},{km:7,calle:"Hohenesch"},
     {km:8,calle:"Große Elbstraße"},{km:9,calle:"Fischauktionshalle"},
     {km:10,calle:"Kreuzfahrtterminal"},{km:11,calle:"Rotherbaum"},
@@ -453,7 +527,7 @@ const CIUDADES = {
     {km:38,calle:"Dammtor"},{km:39,calle:"Planten und Blomen"},
     {km:40,calle:"Messehallen"},{km:42.195,calle:"META 🏁"}
   ]},
-  "Tokio":{flag:"🇯🇵",puntos:[
+  "Tokyo":{flag:"🇯🇵",puntos:[
     {km:10,calle:"Hibiya / Chiyoda"},{km:11,calle:"35.70406, 139.77195"},
     {km:12,calle:"35.69515, 139.77040"},{km:13,calle:"35.68733, 139.77377"},
     {km:14,calle:"35.68665, 139.77920"},{km:15,calle:"35.68565, 139.78758"},
@@ -471,7 +545,7 @@ const CIUDADES = {
     {km:38,calle:"35.64926, 139.74895"},{km:39,calle:"35.65821, 139.75040"},
     {km:40,calle:"35.66672, 139.75407"},{km:42.195,calle:"META 🏁"}
   ]},
-  "Nueva York":{flag:"🇺🇸",puntos:[
+  "New York":{flag:"🇺🇸",puntos:[
     {km:10,calle:"Fourth Ave. - 19th St"},{km:11,calle:"Fourth Ave. - 11th St"},
     {km:12,calle:"Fourth Ave. - Degraw St"},{km:13,calle:"Lafayette Avenue"},
     {km:14,calle:"Lafayette Avenue"},{km:15,calle:"Bedford Avenue"},
@@ -561,11 +635,11 @@ function selCiudad(name){
 
 function rL(){
   const el=document.getElementById('lista-corredores');
-  if(!C.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏃</div><p>Pas encore de coureurs.<br>Appuyez sur <b>"+ Nouveau coureur"</b> pour commencer.</p></div>';return;}
+  if(!C.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏃</div><p>Noch keine Läufer.<br>Drücken Sie <b>"+ Nouveau coureur"</b>, um zu beginnen.</p></div>';return;}
   el.innerHTML=C.map((c,i)=>{
     const p=(c.pasos||[]).filter(x=>x.horaReal).length,tt=(c.pasos||[]).length;
-    const b=p===0?'<span class="badge badge-yellow">Pas commencé</span>':
-             p>=tt?'<span class="badge badge-green">Terminé ✓</span>':
+    const b=p===0?'<span class="badge badge-yellow">Nicht gestartet</span>':
+             p>=tt?'<span class="badge badge-green">Fertig ✓</span>':
              '<span class="badge badge-red">En course · '+p+'/'+tt+'</span>';
     const flag=c.ciudad&&CIUDADES[c.ciudad]?CIUDADES[c.ciudad].flag+' ':'🏙️ ';
     return '<div class="runner-item">'+
@@ -577,13 +651,13 @@ function rL(){
       '</div>'+
       '<div class="runner-actions">'+
         '<button class="btn btn-outline btn-sm" onclick="eC('+i+')">✏️ Modifier</button>'+
-        '<button class="btn btn-primary btn-sm" onclick="aS('+i+')">📍 Suivre</button>'+
+        '<button class="btn btn-primary btn-sm" onclick="aS('+i+')">📍 Suivi</button>'+
         '<button class="btn btn-danger btn-sm" onclick="bC('+i+')">🗑</button>'+
       '</div></div>';
   }).join('');
 }
 
-function bC(i){if(confirm('Supprimer "'+C[i].nombre+'"?')){C.splice(i,1);sv();rL();}}
+function bC(i){if(confirm('"'+C[i].nombre+'" ?')){C.splice(i,1);sv();rL();}}
 
 function nuevoCorreder(){
   ca=null;ciudadSel=null;
@@ -625,7 +699,7 @@ function rPF(){
 function ordenarYRenderizar(){pt.sort((a,b)=>(parseFloat(a.km)||0)-(parseFloat(b.km)||0));rPF();}
 function addPunto(){pt.push({km:'',calle:''});rPF();}
 function rP(i){pt.splice(i,1);rPF();}
-function limpiarPuntos(){if(confirm('Effacer tous les points de rendez-vous ?')){pt=[];rPF();}}
+function limpiarPuntos(){if(confirm('Alle Treffpunkte ?')){pt=[];rPF();}}
 
 function calcularRitmo(){
   const s=getMarcaSecs();
@@ -680,7 +754,7 @@ function tick(){
   if(!c.salidaOficial){reloj.textContent=ahora.toLocaleTimeString();return;}
   const sd=new Date();const[h,m,s]=c.salidaOficial.split(':').map(Number);sd.setHours(h,m,s||0,0);
   const diff=Math.floor((ahora-sd)/1000);
-  if(diff<0){reloj.textContent='⏳ Départ dans '+fh(-diff);return;}
+  if(diff<0){reloj.textContent='⏳ Start in '+fh(-diff);return;}
   reloj.textContent='⏱ '+fh(diff);
   document.getElementById('stat-tc').textContent=fh(diff);
   const pasos=c.pasos||[],conHora=pasos.filter(p=>p.horaRealSecs!=null);
@@ -690,11 +764,13 @@ function tick(){
       const r=tc/u.km;
       document.getElementById('stat-ra').textContent=fm(r)+'/km';
       document.getElementById('stat-mp').textContent=s2t(t2s(c.salidaOficial)+r*KM);
+      document.getElementById('stat-marca-proj').textContent=fh(r*KM);
     }
   }else{
     const ms=ph(c.marca);
     if(ms)document.getElementById('stat-mp').textContent=s2t(t2s(c.salidaOficial)+ms);
     document.getElementById('stat-ra').textContent=c.ritmo?c.ritmo+'/km':'—';
+    const msp=ph(c.marca);if(msp)document.getElementById('stat-marca-proj').textContent=fh(msp);
   }
 }
 
@@ -705,7 +781,7 @@ function rS(){
     let dh='—';
     if(ps&&p.horaPrevista){
       const d=p.horaRealSecs-t2s(p.horaPrevista);
-      if(Math.abs(d)<=10)dh='<span class="badge badge-green">Dans les temps</span>';
+      if(Math.abs(d)<=10)dh='<span class="badge badge-green">Pünktlich</span>';
       else if(d>0)dh='<span class="badge badge-red">+'+fm(d)+'</span>';
       else dh='<span class="badge badge-green">-'+fm(-d)+'</span>';
     }
@@ -717,7 +793,7 @@ function rS(){
       '<td style="font-variant-numeric:tabular-nums;color:'+(ps?'var(--green)':'var(--text2)')+';font-weight:'+(ps?700:400)+';">'+(p.horaReal||'—')+'</td>'+
       '<td>'+dh+'</td>'+
       '<td>'+(ps?'<button class="btn btn-outline btn-sm" onclick="resP('+i+')">↩ Annuler</button>':
-                '<button class="btn btn-green btn-sm" onclick="regP('+i+')">📍 Ici !</button>')+
+                '<button class="btn btn-green btn-sm" onclick="regP('+i+')">📍 Ici!</button>')+
       '</td></tr>';
   }).join('');
   const mp=pasos.find(p=>p.km>=42&&p.horaReal),mc=document.getElementById('seg-meta-card');
@@ -727,9 +803,9 @@ function rS(){
     const ms=ph(c.marca);
     if(ms){
       const d=tf-ms,el=document.getElementById('seg-meta-d');
-      if(Math.abs(d)<=30)el.innerHTML='<span class="badge badge-green">🎯 Dans l\'objectif\u00a0! '+c.marca+'</span>';
-      else if(d>0)el.innerHTML='<span class="badge badge-red">+'+fh(d)+' au-dessus de l\'objectif</span>';
-      else el.innerHTML='<span class="badge badge-green">🎉 '+fh(-d)+' en-dessous de l\'objectif</span>';
+      if(Math.abs(d)<=30)el.innerHTML='<span class="badge badge-green">🎯 Im Ziel! '+c.marca+'</span>';
+      else if(d>0)el.innerHTML='<span class="badge badge-red">+'+fh(d)+' über Zielzeit</span>';
+      else el.innerHTML='<span class="badge badge-green">🎉 '+fh(-d)+' unter Zielzeit</span>';
     }
   }else mc.style.display='none';
 }
@@ -758,13 +834,19 @@ function autoRellenarProno(){
   if(ch.length&&c.salidaOficial){
     const u=ch[ch.length-1],tc=u.horaRealSecs-t2s(c.salidaOficial);
     document.getElementById('prono-km').value=u.km;
-    document.getElementById('prono-t').value=fh(tc);
+    const _tc=Math.round(tc);
+    document.getElementById('prono-t-h').value=Math.floor(_tc/3600);
+    document.getElementById('prono-t-m').value=pad(Math.floor((_tc%3600)/60));
+    document.getElementById('prono-t-s').value=pad(_tc%60);
   }
   calcProno();
 }
 function calcProno(){
   const km=parseFloat(document.getElementById('prono-km').value);
-  const ts=ph(document.getElementById('prono-t').value);
+  const _ph=parseInt(document.getElementById('prono-t-h').value)||0;
+  const _pm=parseInt(document.getElementById('prono-t-m').value)||0;
+  const _ps=parseInt(document.getElementById('prono-t-s').value)||0;
+  const ts=(_ph*3600+_pm*60+_ps)||0;
   const dist=parseFloat(document.getElementById('prono-dist').value)||KM;
   const el=document.getElementById('prono-res');
   if(!km||!ts||km<=0||km>dist||ts<=0){el.style.display='none';return;}
@@ -782,7 +864,7 @@ function calcProno(){
     if(ms){
       vs.style.display='block';
       const d=tot-ms,e=document.getElementById('prono-vs-t');
-      if(Math.abs(d)<=30)e.innerHTML='<span class="badge badge-green">🎯 Dans l\'allure cible\u00a0: '+fh(tot)+' vs '+c.marca+'</span>';
+      if(Math.abs(d)<=30)e.innerHTML='<span class="badge badge-green">🎯 Im Zieltempo: '+fh(tot)+' vs '+c.marca+'</span>';
       else if(d>0)e.innerHTML='<span class="badge badge-red">+'+fh(d)+' au-dessus de l\'objectif ('+c.marca+')</span>';
       else e.innerHTML='<span class="badge badge-green">🔥 '+fh(-d)+' en-dessous de l\'objectif ('+c.marca+')</span>';
     }else vs.style.display='none';
