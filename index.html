@@ -635,7 +635,7 @@ function selCiudad(name){
 
 function rL(){
   const el=document.getElementById('lista-corredores');
-  if(!C.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏃</div><p>Noch keine Läufer.<br>Appuyez sur <b>"+ Nouveau coureur"</b>, por commencer.</p></div>';return;}
+  if(!C.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏃</div><p>Pas encore de coureurs.<br>Appuyez sur <b>"+ Nouveau coureur"</b>, por commencer.</p></div>';return;}
   el.innerHTML=C.map((c,i)=>{
     const p=(c.pasos||[]).filter(x=>x.horaReal).length,tt=(c.pasos||[]).length;
     const b=p===0?'<span class="badge badge-yellow">Nicht gestartet</span>':
